@@ -6,3 +6,7 @@ create table if not exists userAccount(
 )engine=InnoDB;
 
 insert into userAccount(username,money) values('imooc', 10000), ('king', 5000);
+
+CREATE TABLE if not exists test2(
+	id tinyint 
+);
