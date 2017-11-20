@@ -114,3 +114,7 @@ class PdoMysql
 
 }
 
+require_once 'config.php';
+$PdoMysql = new PdoMysql();
+var_dump($PdoMysql);
+
