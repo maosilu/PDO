@@ -6,6 +6,7 @@
  * Date: 2017/11/15
  * Time: 上午10:39
  */
+header('Content-type:text/html;charset=utf-8');
 class PdoMysql
 {
     public static $config = array(); // 设置连接参数
@@ -14,6 +15,13 @@ class PdoMysql
     public static $dbVersion = null; // 保存数据库版本
     public static $connected = false; // 判断是否连接成功
     public static $PDOStatement = null; // 保存PDOStatement对象
+    public static $queryStr = null; // 保存最后执行的操作
+
+    /**
+     * 保存PDO的连接
+     * @param string $dbConfig
+     * @return boolean
+    */
     public function __construct($dbConfig=''){
         if(!class_exists('PDO')){
             self::throw_exception('不支持PDO，请先开启！');
@@ -22,7 +30,7 @@ class PdoMysql
             $dbConfig = array(
                 'hostname' => DB_HOST,
                 'username' => DB_USER,
-                'password' => DB_PASS,
+                'password' => DB_PWD,
                 'database' => DB_NAME,
                 'hostport' => DB_PORT,
                 'dbms'     => DB_TYPE,
@@ -58,15 +66,40 @@ class PdoMysql
         }
     }
 
-    /*
+    /**
      * 得到所有记录
      * */
     public static function getAll($sql = null){
-        if(!$sql){
+        if($sql != null){
             self::query($sql);
         }
         $result = self::$PDOStatement->fetchAll(constant("PDO::FETCH_ASSOC"));
         return $result;
+    }
+
+    /**
+     * 释放结果集
+     * */
+    public static function free(){
+        self::$PDOStatement = null;
+    }
+    public static function query($sql = ''){
+        $link = self::$link;
+        if(!$link) return false;
+        //判断之前是否有结果集，如果有的话，释放结果集
+        if(!empty(self::$PDOStatement)) self::free();
+        // 保存最后使用的sql语句
+        self::$queryStr = $sql;
+        self::$PDOStatement = $link->prepare(self::$queryStr);
+        $res = self::$PDOStatement->execute();
+        self::haveErrorThrowException();
+        return $res;
+    }
+
+    public static function haveErrorThrowException(){
+        $obj = empty(self::$PDOStatement) ? self::$link : self::$PDOStatement;
+        $arrError = $obj->errorInfo();
+        var_dump($arrError);
     }
 
     /**
@@ -80,3 +113,4 @@ class PdoMysql
     }
 
 }
+
