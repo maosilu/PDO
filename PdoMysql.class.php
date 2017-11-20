@@ -116,5 +116,7 @@ class PdoMysql
 
 require_once 'config.php';
 $PdoMysql = new PdoMysql();
-var_dump($PdoMysql);
+//var_dump($PdoMysql);
+$sql = "SELECT * FROM pdo_user1";
+var_dump($PdoMysql->getAll($sql));
 
