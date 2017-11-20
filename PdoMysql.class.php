@@ -16,6 +16,7 @@ class PdoMysql
     public static $connected = false; // 判断是否连接成功
     public static $PDOStatement = null; // 保存PDOStatement对象
     public static $queryStr = null; // 保存最后执行的操作
+    public static $error = null; // 保存错误信息
 
     /**
      * 保存PDO的连接
@@ -99,7 +100,16 @@ class PdoMysql
     public static function haveErrorThrowException(){
         $obj = empty(self::$PDOStatement) ? self::$link : self::$PDOStatement;
         $arrError = $obj->errorInfo();
-        var_dump($arrError);
+//        var_dump($arrError);
+        if($arrError[0] != '00000'){
+            self::$error = 'SQLSTATE: '.$arrError[0].'<br/>SQL Error: '.$arrError[2]."<br/>Error SQL: ".self::$queryStr; // 保存错误信息
+            self::throw_exception(self::$error);
+            return false;
+        }
+        if(self::$queryStr == ''){
+            self::throw_exception('没有执行的SQL语句！');
+            return false;
+        }
     }
 
     /**
