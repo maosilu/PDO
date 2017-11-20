@@ -77,7 +77,18 @@ class PdoMysql
         $result = self::$PDOStatement->fetchAll(constant("PDO::FETCH_ASSOC"));
         return $result;
     }
-
+    /**
+     * 得到单条记录
+     * @param sting $sql
+     * @return mixed
+    */
+    public static function getRow($sql = ''){
+        if($sql != null){
+            self::query($sql);
+        }
+        $result = self::$PDOStatement->fetch(constant("PDO::FETCH_ASSOC"));
+        return $result;
+    }
     /**
      * 释放结果集
      * */
@@ -127,6 +138,7 @@ class PdoMysql
 require_once 'config.php';
 $PdoMysql = new PdoMysql();
 //var_dump($PdoMysql);
-$sql = "SELECT * FROM pdo_user1";
-var_dump($PdoMysql->getAll($sql));
-
+//$sql = "SELECT * FROM pdo_user1";
+//var_dump($PdoMysql->getAll($sql));
+$sql = "SELECT * FROM pdo_user WHERE id=23";
+var_dump($PdoMysql->getRow($sql));
