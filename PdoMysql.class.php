@@ -17,6 +17,8 @@ class PdoMysql
     public static $PDOStatement = null; // 保存PDOStatement对象
     public static $queryStr = null; // 保存最后执行的操作
     public static $error = null; // 保存错误信息
+    public static $lastInsertId = null; // 最后插入记录的ID
+    public static $numRows = null; // 上一步操作产生受影响记录的条数
 
     /**
      * 保存PDO的连接
@@ -88,6 +90,26 @@ class PdoMysql
         }
         $result = self::$PDOStatement->fetch(constant("PDO::FETCH_ASSOC"));
         return $result;
+    }
+    /**
+     * 执行增删改操作，返回受影响的记录的条数
+     * @param string $sql
+     * $return boolean|int 
+    */
+    public static function execute($sql = null){
+        $link = self::$link;
+        if(!$link) return false;
+        if(!empty(self::$PDOStatement)) self::free();
+        self::$queryStr = $sql;
+        $result = $link->exec(self::$queryStr);
+        self::haveErrorThrowException();
+        if($result){
+            self::$lastInsertId = $link->lastInsertId(); // 如果执行插入语句，保存上一步插入操作产生的的AUTO_INCREMENT
+            self::$numRows = $result; // 如果执行的是删除、更新操作，返回的是受影响的行数
+            return self::$numRows;
+        }else{
+            return false;
+        }
     }
     /**
      * 释放结果集
