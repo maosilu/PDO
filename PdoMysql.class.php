@@ -91,6 +91,54 @@ class PdoMysql
         $result = self::$PDOStatement->fetch(constant("PDO::FETCH_ASSOC"));
         return $result;
     }
+
+    /**
+     * 根据主键查找记录
+     * @param string $tabName 表名
+     * @param int $priId 主键值
+     * @param string $fields 要查询的字段
+     * @return array 根据主键查找出的一条记录结果
+    */
+    public static function findById($tabName, $priId, $fields='*'){
+        $sql = "SELECT %s FROM %s WHERE id=%d";
+        return self::getRow(sprintf($sql, self::parseFields($fields), $tabName, $priId));
+    }
+    /**
+     * 解析字段，检查拼接查询语句中要查询的字段，使之合理化
+    */
+    public static function parseFields($fields){
+        if(is_array($fields) && !empty($fields)){
+            array_walk($fields, array('PdoMysql', 'addSpecialChar'));
+            $fieldsStr = implode(',', $fields);
+        }elseif(is_string($fields) && !empty($fields) && $fields !== '*'){
+            if(strpos($fields, '`') === false){
+                $fields = explode(',', $fields);
+                array_walk($fields, array('PdoMysql', 'addSpecialChar'));
+                $fieldsStr = implode(',', $fields);
+            }else{
+                $fieldsStr = $fields;
+            }
+        }else{
+            $fieldsStr = '*';
+        }
+
+        return $fieldsStr;
+    }
+
+    /**
+     * 通过反引号引用字段，防止使用mysql保留的特殊字作为字段而产生错误
+     * @param array &$value 应用mysql中需要查找的字段$fields数组中的值
+     * @return array 返回一个数组，数组中的每个值都添加了反引号
+    */
+    public static function addSpecialChar(&$value){
+        if($value==='*' || strpos($value, '.') !== false || strpos($value, '`') !== false){
+            //不用做处理
+        }elseif(strpos($value, '`') === false){
+            $value = '`'.trim($value).'`';
+        }
+
+        return $value;
+    }
     /**
      * 执行增删改操作，返回受影响的记录的条数
      * @param string $sql
@@ -150,7 +198,7 @@ class PdoMysql
      * @param string $errMsg 错误信息
     */
     public static function throw_exception($errMsg){
-        echo '<div style="width:80%;background-color:#ABCDEF;color:black;font-size:20px;padding: 20px 0px;">
+        echo '<div style="width:100%;background-color:#ABCDEF;color:black;font-size:20px;padding: 20px 0px;">
 '.$errMsg.'
 </div>';
     }
@@ -164,7 +212,15 @@ $PdoMysql = new PdoMysql();
 //var_dump($PdoMysql->getAll($sql));
 /*$sql = "SELECT * FROM pdo_user WHERE id=23";
 var_dump($PdoMysql->getRow($sql));*/
-$sql = "INSERT INTO pdo_user(username, password, email) VALUES('test3', 'test1', 'test1@imooc.com')";
+/*$sql = "INSERT INTO pdo_user(username, password, email) VALUES('test3', 'test1', 'test1@imooc.com')";
 echo $PdoMysql->execute($sql);
 echo "<hr/>";
-echo $PdoMysql::$lastInsertId;
+echo $PdoMysql::$lastInsertId;*/
+echo "<pre>";
+$tabName = 'pdo_user';
+$priId = 27;
+//$fields = array();
+//$fields = 'username, email';
+//$fields = '*';
+$fields = array('username', 'email');
+var_dump($PdoMysql->findById($tabName, $priId, $fields));
