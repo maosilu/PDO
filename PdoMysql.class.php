@@ -162,5 +162,9 @@ $PdoMysql = new PdoMysql();
 //var_dump($PdoMysql);
 //$sql = "SELECT * FROM pdo_user1";
 //var_dump($PdoMysql->getAll($sql));
-$sql = "SELECT * FROM pdo_user WHERE id=23";
-var_dump($PdoMysql->getRow($sql));
+/*$sql = "SELECT * FROM pdo_user WHERE id=23";
+var_dump($PdoMysql->getRow($sql));*/
+$sql = "INSERT INTO pdo_user(username, password, email) VALUES('test3', 'test1', 'test1@imooc.com')";
+echo $PdoMysql->execute($sql);
+echo "<hr/>";
+echo $PdoMysql::$lastInsertId;
