@@ -120,6 +120,8 @@ class PdoMysql
             .self::parseHaving($having)
             .self::parseOrder($order)
             .self::parseLimit($limit);
+        echo $sql;
+        echo "<hr/>";
         $dataAll = self::getAll($sql);
         return count($dataAll)==1 ? $dataAll[0] : $dataAll;
     }
@@ -177,7 +179,7 @@ class PdoMysql
     /**
      * 解析限制显示条数limit
      * 可以有两个值的形式 limit 3 等同于 limit 0,3
-     * @param string|array $limit
+     * @param string|array|integer $limit
      * @return string
     */
     public static function parseLimit($limit){
@@ -189,6 +191,8 @@ class PdoMysql
                 $limitStr .= ' LIMIT '.$limit[0];
             }
         }elseif(is_string($limit) && !empty($limit)){
+            $limitStr .= ' LIMIT '.$limit;
+        }elseif(is_numeric($limit) && $limit>0){
             $limitStr .= ' LIMIT '.$limit;
         }
         return $limitStr;
@@ -298,19 +302,41 @@ class PdoMysql
 require_once 'config.php';
 $PdoMysql = new PdoMysql();
 //var_dump($PdoMysql);
+
+//测试getAll()方法
 //$sql = "SELECT * FROM pdo_user1";
 //var_dump($PdoMysql->getAll($sql));
+
+//测试getRow()方法
 /*$sql = "SELECT * FROM pdo_user WHERE id=23";
 var_dump($PdoMysql->getRow($sql));*/
+
+//测试execute()方法
 /*$sql = "INSERT INTO pdo_user(username, password, email) VALUES('test3', 'test1', 'test1@imooc.com')";
 echo $PdoMysql->execute($sql);
 echo "<hr/>";
 echo $PdoMysql::$lastInsertId;*/
+
 echo "<pre>";
-$tabName = 'pdo_user';
-$priId = 27;
+
+//测试findById()方法
+/*$tabName = 'pdo_user';
+$priId = 27;*/
 //$fields = array();
 //$fields = 'username, email';
 //$fields = '*';
-$fields = array('username', 'email');
-var_dump($PdoMysql->findById($tabName, $priId, $fields));
+/*$fields = array('username', 'email');
+var_dump($PdoMysql->findById($tabName, $priId, $fields));*/
+
+//测试find()方法
+$tables = 'pdo_user';
+$where = 'id > 20';
+$fields = '*';
+//$group = 'username, email';
+//$having = "email = 'test1@imooc.com'";
+//$order = 'email asc,id desc';
+//$order = 'email,id asc';
+//$limit = '1,1';
+//$limit = 1;
+$limit = array(1);
+var_dump($PdoMysql->find($tables, $where, $fields, null, $having=null, $order=null, $limit));
