@@ -91,7 +91,6 @@ class PdoMysql
         $result = self::$PDOStatement->fetch(constant("PDO::FETCH_ASSOC"));
         return $result;
     }
-
     /**
      * 根据主键查找记录
      * @param string $tabName 表名
@@ -102,6 +101,97 @@ class PdoMysql
     public static function findById($tabName, $priId, $fields='*'){
         $sql = "SELECT %s FROM %s WHERE id=%d";
         return self::getRow(sprintf($sql, self::parseFields($fields), $tabName, $priId));
+    }
+    /**
+     * 执行普通查询
+     * @param string $tables
+     * @param string $where
+     * @param string|array $fields
+     * @param string|array $group
+     * @param string $having
+     * @param string|array $order
+     * @param string|array $limit
+     * @return array
+    */
+    public static function find($tables, $where=null, $fields='*', $group=null, $having=null, $order=null, $limit=null){
+        $sql = 'SELECT '.self::parseFields($fields).' FROM '.$tables
+            .self::parseWhere($where)
+            .self::parseGroup($group)
+            .self::parseHaving($having)
+            .self::parseOrder($order)
+            .self::parseLimit($limit);
+        $dataAll = self::getAll($sql);
+        return count($dataAll)==1 ? $dataAll[0] : $dataAll;
+    }
+    /**
+     * 解析where条件
+     * @param string $where where条件
+     * @return string where条件
+    */
+    public static function parseWhere($where){
+        $whereStr = '';
+        if(is_string($where) && !empty($where)){
+            $whereStr = $where;
+        }
+        return empty($whereStr) ? '' : ' WHERE '.$whereStr;
+    }
+    /**
+     * 解析group by
+     * @param string $group 分组条件
+     * @return string 分组条件
+    */
+    public static function parseGroup($group){
+        $groupStr = '';
+        if(is_array($group) && !empty($group)){
+            $groupStr .= ' GROUP BY '.implode(',', $group);
+        }elseif(is_string($group) && !empty($group)){
+            $groupStr .= ' GROUP BY '.$group;
+        }
+        return empty($groupStr) ? '' : $groupStr;
+    }
+    /**
+     * 对分组结果通过having字句进行二次筛选
+     * @param string $having
+     * @return string
+    */
+    public static function parseHaving($having){
+        $havingStr = '';
+        if(is_string($having) && !empty($having)){
+            $havingStr = $having;
+        }
+        return empty($having) ? '' : ' HAVING '.$havingStr;
+    }
+    /**
+     * 解析order by
+     * @param string|array $order
+    */
+    public static function parseOrder($order){
+        $orderStr = '';
+        if(is_array($order)){
+            $orderStr .= ' ORDER BY '.join(',', $order);
+        }elseif(is_string($order) && !empty($order)){
+            $orderStr .= ' ORDER BY '.$order;
+        }
+        return $orderStr;
+    }
+    /**
+     * 解析限制显示条数limit
+     * 可以有两个值的形式 limit 3 等同于 limit 0,3
+     * @param string|array $limit
+     * @return string
+    */
+    public static function parseLimit($limit){
+        $limitStr = '';
+        if(is_array($limit)){
+            if(count($limit) > 1){
+                $limitStr .= ' LIMIT '.$limit[0].','.$limit[1];
+            }else{
+                $limitStr .= ' LIMIT '.$limit[0];
+            }
+        }elseif(is_string($limit) && !empty($limit)){
+            $limitStr .= ' LIMIT '.$limit;
+        }
+        return $limitStr;
     }
     /**
      * 解析字段，检查拼接查询语句中要查询的字段，使之合理化
