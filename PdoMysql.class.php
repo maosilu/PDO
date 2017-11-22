@@ -381,7 +381,12 @@ class PdoMysql
 '.$errMsg.'
 </div>';
     }
-
+    /**
+     * 销毁连接对象，关闭数据库
+    */
+    public static function close(){
+        self::$link = null;
+    }
 }
 
 require_once 'config.php';
