@@ -120,8 +120,6 @@ class PdoMysql
             .self::parseHaving($having)
             .self::parseOrder($order)
             .self::parseLimit($limit);
-        echo $sql;
-        echo "<hr/>";
         $dataAll = self::getAll($sql);
         return count($dataAll)==1 ? $dataAll[0] : $dataAll;
     }
@@ -137,6 +135,25 @@ class PdoMysql
         $fieldsStr = join(',', $keys);
         $values = "'".join("','", array_values($data))."'";
         $sql = "INSERT INTO {$table}({$fieldsStr}) VALUES({$values})";
+//        echo $sql;
+        return self::execute($sql);
+    }
+    /**
+     * 更新操作
+     * @param array $data
+     * @param string $table
+     * @param $where
+     * @param string|array $order
+     * @param string|array $limit
+     * @return boolean|int
+    */
+    public static function update($data,$table,$where='',$order='',$limit=0){
+        $sets = '';
+        foreach($data as $key=>$val){
+            $sets .= $key."='".$val."',";
+        }
+        $sets = rtrim($sets, ',');
+        $sql = "UPDATE {$table} SET {$sets} ".self::parseWhere($where).self::parseOrder($order).self::parseLimit($limit);
 //        echo $sql;
         return self::execute($sql);
     }
@@ -176,7 +193,7 @@ class PdoMysql
         if(is_string($having) && !empty($having)){
             $havingStr = $having;
         }
-        return empty($having) ? '' : ' HAVING '.$havingStr;
+        return empty($havingStr) ? '' : ' HAVING '.$havingStr;
     }
     /**
      * 解析order by
@@ -332,7 +349,7 @@ echo $PdoMysql->execute($sql);
 echo "<hr/>";
 echo $PdoMysql::$lastInsertId;*/
 
-echo "<pre>";
+//echo "<pre>";
 
 //测试findById()方法
 /*$tabName = 'pdo_user';
@@ -357,10 +374,22 @@ $fields = '*';
 var_dump($PdoMysql->find($tables, $where, $fields, null, $having=null, $order=null, $limit));*/
 
 //add()方法测试
-$data = array(
+/*$data = array(
     'username' => 'meimei1',
     'password' => 'meimei1',
     'email' => 'meimei1@imooc.com'
 );
 $table = 'pdo_user';
-var_dump($PdoMysql->add($data, $table));
+var_dump($PdoMysql->add($data, $table));*/
+
+//update()方法测试
+$data = array(
+    'username' => 'meimei4',
+    'password' => 'meimei3',
+    'email' => 'meimei3@imooc.com'
+);
+$table = 'pdo_user';
+$where = 'id<=19 ';
+$order = 'id desc';
+$limit = array(1);
+var_dump($PdoMysql->update($data, $table,$where, $order, $limit));
