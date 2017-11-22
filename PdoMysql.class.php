@@ -144,7 +144,7 @@ class PdoMysql
      * @param string $table
      * @param $where
      * @param string|array $order
-     * @param string|array $limit
+     * @param string|array|int $limit SQL更新语句中的limit只能有一个参数
      * @return boolean|int
     */
     public static function update($data,$table,$where='',$order='',$limit=0){
@@ -155,6 +155,18 @@ class PdoMysql
         $sets = rtrim($sets, ',');
         $sql = "UPDATE {$table} SET {$sets} ".self::parseWhere($where).self::parseOrder($order).self::parseLimit($limit);
 //        echo $sql;
+        return self::execute($sql);
+    }
+    /**
+     * 删除记录的操作
+     * @param string $table
+     * @param string $where
+     * @param string|array $order
+     * @param string|int|array $limit SQL删除语句中的limit只能有一个参数
+     * @return boolean|int
+    */
+    public static function delete($table, $where=null, $order=null, $limit=0){
+        $sql = "DELETE FROM {$table} ".self::parseWhere($where).self::parseOrder($order).self::parseLimit($limit);
         return self::execute($sql);
     }
     /**
@@ -383,7 +395,7 @@ $table = 'pdo_user';
 var_dump($PdoMysql->add($data, $table));*/
 
 //update()方法测试
-$data = array(
+/*$data = array(
     'username' => 'meimei4',
     'password' => 'meimei3',
     'email' => 'meimei3@imooc.com'
@@ -392,4 +404,11 @@ $table = 'pdo_user';
 $where = 'id<=19 ';
 $order = 'id desc';
 $limit = array(1);
-var_dump($PdoMysql->update($data, $table,$where, $order, $limit));
+var_dump($PdoMysql->update($data, $table,$where, $order, $limit));*/
+
+//delete()方法的测试
+$table = 'pdo_user';
+$where = 'id<6';
+$order = 'id DESC';
+$limit = '2';
+var_dump($PdoMysql->delete($table, $where, $order=null, $limit));
