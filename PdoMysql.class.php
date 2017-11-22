@@ -188,6 +188,29 @@ class PdoMysql
         return self::$lastInsertId;
     }
     /**
+     * 得到数据库中的数据表
+     * @return array $tables
+    */
+    public static function showTables(){
+        $tables = array();
+        if(self::query("SHOW tables")){
+            $result = self::getAll();
+            foreach($result as $key=>$val){
+                $tables[$key] = current($val);
+            }
+        }
+        return $tables;
+    }
+    /**
+     * 得到数据库的版本
+     * @return string
+    */
+    public static function getDBVersion(){
+        $link = self::$link;
+        if(!$link) return false;
+        return self::$dbVersion;
+    }
+    /**
      * 解析where条件
      * @param string $where where条件
      * @return string where条件
@@ -425,8 +448,11 @@ $limit = array(1);
 var_dump($PdoMysql->update($data, $table,$where, $order, $limit));*/
 
 //delete()方法的测试
-$table = 'pdo_user';
+/*$table = 'pdo_user';
 $where = 'id<6';
 $order = 'id DESC';
 $limit = '2';
-var_dump($PdoMysql->delete($table, $where, $order=null, $limit));
+var_dump($PdoMysql->delete($table, $where, $order=null, $limit));*/
+
+//showTables()函数测试
+var_dump($PdoMysql->showTables());
