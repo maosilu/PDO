@@ -179,6 +179,15 @@ class PdoMysql
         return self::$queryStr;
     }
     /**
+     * 得到上一步插入操作产生的AUTO_INCREMENT
+     * @return int
+    */
+    public static function getLastInsertId(){
+        $link = self::$link;
+        if(!$link) return false;
+        return self::$lastInsertId;
+    }
+    /**
      * 解析where条件
      * @param string $where where条件
      * @return string where条件
