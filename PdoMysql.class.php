@@ -170,6 +170,15 @@ class PdoMysql
         return self::execute($sql);
     }
     /**
+     * 得到最后执行的SQL语句
+     * @return string
+    */
+    public static function getLastSql(){
+        $link = self::$link;
+        if(!$link) return false;
+        return self::$queryStr;
+    }
+    /**
      * 解析where条件
      * @param string $where where条件
      * @return string where条件
