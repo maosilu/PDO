@@ -126,6 +126,21 @@ class PdoMysql
         return count($dataAll)==1 ? $dataAll[0] : $dataAll;
     }
     /**
+     * 添加记录的操作
+     * @param array $data 要添加的记录
+     * @param string $table 表名
+     * @return boolean|int
+    */
+    public static function add($data, $table){
+        $keys = array_keys($data);
+        array_walk($keys, array('PdoMysql', 'addSpecialChar'));
+        $fieldsStr = join(',', $keys);
+        $values = "'".join("','", array_values($data))."'";
+        $sql = "INSERT INTO {$table}({$fieldsStr}) VALUES({$values})";
+//        echo $sql;
+        return self::execute($sql);
+    }
+    /**
      * 解析where条件
      * @param string $where where条件
      * @return string where条件
@@ -338,5 +353,14 @@ $fields = '*';
 //$order = 'email,id asc';
 //$limit = '1,1';
 //$limit = 1;
-$limit = array(1);
-var_dump($PdoMysql->find($tables, $where, $fields, null, $having=null, $order=null, $limit));
+/*$limit = array(1);
+var_dump($PdoMysql->find($tables, $where, $fields, null, $having=null, $order=null, $limit));*/
+
+//add()方法测试
+$data = array(
+    'username' => 'meimei1',
+    'password' => 'meimei1',
+    'email' => 'meimei1@imooc.com'
+);
+$table = 'pdo_user';
+var_dump($PdoMysql->add($data, $table));
