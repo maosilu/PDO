@@ -15,12 +15,12 @@ require_once './pwd.php';
 $act = $_GET['act'];
 $username = addslashes($_POST['username']);
 $password = md5($_POST['password']);
-$email = $_POST['email'];
 //3.得到连接对象
 $PdoMysql = new PdoMysql();
 $table = 'user';
 if($act === 'reg'){
     //完成注册的功能
+    $email = $_POST['email'];
     $regtime = time();
     $token = md5($username.$password.$regtime);
     $token_exptime = $regtime+24*3600; // 过期时间
@@ -30,7 +30,7 @@ if($act === 'reg'){
     if($res){
         //发送邮件，以QQ邮箱为例
         //设置邮件服务器，得到传输对象
-        $transport = Swift_SmtpTransport::newInstance('smtp.qq.com', 25);
+        $transport = Swift_SmtpTransport::newInstance('smtp.qq.com', 465, 'ssl');
         //设置登录账号和密码
         $transport->setUsername('1540688711@qq.com');
         $transport->setPassword($emailPassword);
@@ -75,5 +75,31 @@ EOF;
     }
 }elseif($act === 'login'){
     //完成登录的功能
+    $row = $PdoMysql->find($table, "username='{$username}' AND password='{$password}'", 'status');
+    if($row['status'] == 0){
+        echo '请先激活，再登录';
+//        echo "<meta http-equiv='Refresh' content='3;url=index.php#tologin'/>";
+    }else{
+        echo '登录成功，3秒后跳转到首页';
+        echo "<meta http-equiv='Refresh' content='3;url=https://www.imooc.com'/>";
+    }
+}elseif($act === 'active'){
+    //完成激活操作
+    $token = $_GET['token'];
+    $row = $PdoMysql->find($table, "token='{$token}' AND status=0", array('id', 'token_exptime'));
+    $lastSql = $PdoMysql->getLastSql();
+    $now = time();
+    if($now > $row['token_exptime']){
+        echo '激活时间过期，请重新登录激活';
+    }else{
+        $res = $PdoMysql->update(array('status'=>1), $table, 'id='.$row['id']);
+        if($res){
+            echo '激活成功，3秒后跳转到登录页面';
+            echo "<meta http-equiv='Refresh' content='3;url=index.php#tologin'/>";
+        }else{
+            echo '激活失败，请重新登录激活';
+            echo "<meta http-equiv='Refresh' content='3;url=index.php'/>";
+        }
+    }
 }
 
