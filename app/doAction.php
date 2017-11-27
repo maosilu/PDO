@@ -5,6 +5,7 @@
  * Date: 2017/11/22
  * Time: 下午4:40
  */
+header('content-type:text/html;charset=utf-8');
 //1.包含所需文件
 require_once './swiftmailer-master/lib/swift_required.php';
 require_once './PdoMysql.class.php';
@@ -21,9 +22,9 @@ $table = 'user';
 if($act === 'reg'){
     //完成注册的功能
     $regtime = time();
-    $token = md5($username,$password,$regtime);
+    $token = md5($username.$password.$regtime);
     $token_exptime = $regtime+24*3600; // 过期时间
-    $data = compact($username, $password, $email, $token, $token_exptime, $regtime);
+    $data = compact('username', 'password', 'email', 'token', 'token_exptime', 'regtime');
     $res = $PdoMysql->add($data, $table);
     $lastInsertId = $PdoMysql->getLastInsertId();
     if($res){
@@ -40,7 +41,7 @@ if($act === 'reg'){
         //设置管理员信息
         $message->setFrom(array('1540688711@qq.com' =>'bingxiaoxiao'));
         //邮件接收方
-        $message->setTo(array($emial=>'maosilu'));
+        $message->setTo(array($email=>'maosilu'));
         //设置邮件主题
         $message->setSubject('激活邮件');
         //设置邮件内容
@@ -56,7 +57,7 @@ EOF;
         $message->setBody("{$str}", 'text/html', 'utf-8');
         try{
             if($mailer->send($message)){
-                echo "恭喜您{$username}注册成功，青岛邮箱激活之后登录<br/>";
+                echo "恭喜您{$username}注册成功，请到邮箱激活之后登录<br/>";
                 echo '3秒后跳转到登录页面';
                 echo "<meta http-equiv='refresh' content='3;url=index.php#tologin'/>";
             }else{
